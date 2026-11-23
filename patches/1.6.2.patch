@@ -1,0 +1,385 @@
+diff --git a/apktool.yml b/apktool.yml
+index 446896a..000d5df 100644
+--- a/apktool.yml
++++ b/apktool.yml
+@@ -3,3 +3,3 @@ apkFileName: 高明TV_1.6.0_2026-11-23.apk
+ sdkInfo:
+-  minSdkVersion: 23
++  minSdkVersion: 19
+ doNotCompress:
+diff --git a/smali/cn/gaoming/tv/MainActivity.smali b/smali/cn/gaoming/tv/MainActivity.smali
+index 3fc30a7..7d492ed 100644
+--- a/smali/cn/gaoming/tv/MainActivity.smali
++++ b/smali/cn/gaoming/tv/MainActivity.smali
+@@ -2881,9 +2881,3 @@
+     .line 0
+-    invoke-static {p0}, Lo0/f;->e(Landroid/content/Context;)Landroid/content/SharedPreferences;
+-
+-    move-result-object v3
+-
+-    const-string v4, "video_output"
+-
+-    invoke-interface {v3, v4}, Landroid/content/SharedPreferences;->contains(Ljava/lang/String;)Z
++    invoke-static {p0}, Lo0/f;->g(Landroid/content/Context;)I
+ 
+@@ -2891,3 +2885,5 @@
+ 
+-    if-nez v3, :cond_1
++    const/4 v4, 0x2
++
++    if-ne v3, v4, :cond_1
+ 
+@@ -5309,9 +5305,3 @@
+     .line 0
+-    invoke-static {p0}, Lo0/f;->e(Landroid/content/Context;)Landroid/content/SharedPreferences;
+-
+-    move-result-object v2
+-
+-    const-string v5, "video_output"
+-
+-    invoke-interface {v2, v5}, Landroid/content/SharedPreferences;->contains(Ljava/lang/String;)Z
++    invoke-static {p0}, Lo0/f;->g(Landroid/content/Context;)I
+ 
+@@ -5319,3 +5309,5 @@
+ 
+-    if-nez v2, :cond_8
++    const/4 v5, 0x2
++
++    if-ne v2, v5, :cond_8
+ 
+diff --git a/smali/o0/B.smali b/smali/o0/B.smali
+index f6c41ad..bfc223f 100644
+--- a/smali/o0/B.smali
++++ b/smali/o0/B.smali
+@@ -403,3 +403,3 @@
+ 
+-    const-wide/16 v2, 0x1194
++    const-wide/16 v2, 0x186a
+ 
+diff --git a/smali/o0/G.smali b/smali/o0/G.smali
+index c79e715..4c5818e 100644
+--- a/smali/o0/G.smali
++++ b/smali/o0/G.smali
+@@ -317,3 +317,3 @@
+ 
+-    const-wide/16 v3, 0x1194
++    const-wide/16 v3, 0x1d4c
+ 
+diff --git a/smali/o0/N.smali b/smali/o0/N.smali
+index 51a863d..bc5e3df 100644
+--- a/smali/o0/N.smali
++++ b/smali/o0/N.smali
+@@ -192,3 +192,3 @@
+ 
+-    const/16 v1, 0x1964
++    const/16 v1, 0x1f40
+ 
+@@ -519,2 +519,25 @@
+ 
++.method private createPlaybackSurface()Landroid/view/SurfaceView;
++    .locals 3
++
++    invoke-virtual {p0}, Landroid/view/View;->getContext()Landroid/content/Context;
++
++    move-result-object v0
++
++    new-instance v1, Landroid/view/SurfaceView;
++
++    invoke-direct {v1, v0}, Landroid/view/SurfaceView;-><init>(Landroid/content/Context;)V
++
++    sget v0, Landroid/os/Build$VERSION;->SDK_INT:I
++
++    const/16 v2, 0x22
++
++    if-lt v0, v2, :ready
++
++    invoke-static {v1}, Lo0/O;->setPlaybackSurfaceLifecycle(Landroid/view/SurfaceView;)V
++
++    :ready
++    return-object v1
++.end method
++
+ # virtual methods
+@@ -532,9 +555,5 @@
+     :cond_0
+-    new-instance v0, Landroid/view/SurfaceView;
+-
+-    invoke-virtual {p0}, Landroid/view/View;->getContext()Landroid/content/Context;
+-
+-    move-result-object v1
++    invoke-direct {p0}, Lo0/N;->createPlaybackSurface()Landroid/view/SurfaceView;
+ 
+-    invoke-direct {v0, v1}, Landroid/view/SurfaceView;-><init>(Landroid/content/Context;)V
++    move-result-object v0
+ 
+@@ -1208,3 +1227,3 @@
+ 
+-    const/16 v8, 0x1964
++    const/16 v8, 0x1f40
+ 
+@@ -1445,9 +1464,3 @@
+     .line 0
+-    invoke-static {v0}, Lo0/f;->e(Landroid/content/Context;)Landroid/content/SharedPreferences;
+-
+-    move-result-object v0
+-
+-    const-string v1, "video_output"
+-
+-    invoke-interface {v0, v1}, Landroid/content/SharedPreferences;->contains(Ljava/lang/String;)Z
++    invoke-static {v0}, Lo0/f;->g(Landroid/content/Context;)I
+ 
+@@ -1455,3 +1468,5 @@
+ 
+-    if-nez v0, :cond_1
++    const/4 v1, 0x2
++
++    if-ne v0, v1, :cond_1
+ 
+@@ -1585,3 +1600,3 @@
+     :cond_0
+-    const/16 v0, 0x3e8
++    const/16 v0, 0x9c4
+ 
+@@ -1596,3 +1611,3 @@
+ 
+-    const/16 v4, 0x7d0
++    const/16 v4, 0x1388
+ 
+@@ -2357,9 +2372,5 @@
+     :cond_b
+-    new-instance v0, Landroid/view/SurfaceView;
++    invoke-direct {p0}, Lo0/N;->createPlaybackSurface()Landroid/view/SurfaceView;
+ 
+-    invoke-virtual {p0}, Landroid/view/View;->getContext()Landroid/content/Context;
+-
+-    move-result-object v1
+-
+-    invoke-direct {v0, v1}, Landroid/view/SurfaceView;-><init>(Landroid/content/Context;)V
++    move-result-object v0
+ 
+@@ -2496,3 +2507,3 @@
+ 
+-    const-wide/16 p2, 0x1194
++    const-wide/16 p2, 0x186a
+ 
+diff --git a/smali/o0/O.smali b/smali/o0/O.smali
+index dc87f58..906e155 100644
+--- a/smali/o0/O.smali
++++ b/smali/o0/O.smali
+@@ -450 +450,12 @@
+ .end method
++
++
++.method public static setPlaybackSurfaceLifecycle(Landroid/view/SurfaceView;)V
++    .locals 1
++
++    const/4 v0, 0x2
++
++    invoke-virtual {p0, v0}, Landroid/view/SurfaceView;->setSurfaceLifecycle(I)V
++
++    return-void
++.end method
+diff --git a/smali/o0/f.smali b/smali/o0/f.smali
+index bb19019..8d7bfbe 100644
+--- a/smali/o0/f.smali
++++ b/smali/o0/f.smali
+@@ -38,14 +38,5 @@
+ .method public static a(Landroid/content/Context;)I
+-    .locals 2
+-
+-    .line 0
+-    invoke-static {p0}, Lo0/f;->e(Landroid/content/Context;)Landroid/content/SharedPreferences;
+-
+-    move-result-object p0
+-
+-    const-string v0, "video_output"
+-
+-    const/4 v1, 0x0
++    .locals 1
+ 
+-    invoke-interface {p0, v0, v1}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
++    invoke-static {p0}, Lo0/f;->g(Landroid/content/Context;)I
+ 
+@@ -55,8 +46,10 @@
+ 
+-    if-ne p0, v0, :cond_0
++    if-ne p0, v0, :compatibility
+ 
+-    const/4 v1, 0x1
++    return v0
+ 
+-    :cond_0
+-    return v1
++    :compatibility
++    const/4 v0, 0x0
++
++    return v0
+ .end method
+@@ -409 +402,36 @@
+ .end method
++
++
++.method public static g(Landroid/content/Context;)I
++    .locals 2
++
++    invoke-static {p0}, Lo0/f;->e(Landroid/content/Context;)Landroid/content/SharedPreferences;
++
++    move-result-object p0
++
++    const-string v0, "video_output"
++
++    const/4 v1, 0x1
++
++    invoke-interface {p0, v0, v1}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
++
++    move-result p0
++
++    if-eqz p0, :supported
++
++    const/4 v0, 0x2
++
++    if-ne p0, v0, :direct
++
++    invoke-static {}, Lo0/f;->b()Z
++
++    move-result v0
++
++    if-nez v0, :supported
++
++    :direct
++    return v1
++
++    :supported
++    return p0
++.end method
+diff --git a/smali/o0/g.smali b/smali/o0/g.smali
+index 8db8dd7..0076cb2 100644
+--- a/smali/o0/g.smali
++++ b/smali/o0/g.smali
+@@ -394,25 +394,3 @@
+     :cond_b
+-    if-eqz p1, :cond_c
+-
+-    .line 0
+-    invoke-virtual {v6, v1, v5}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
+-
+-    move-result-object v0
+-
+-    .line 0
+-    const-string v1, "video_output"
+-
+-    invoke-interface {v0, v1}, Landroid/content/SharedPreferences;->contains(Ljava/lang/String;)Z
+-
+-    move-result v0
+-
+-    if-nez v0, :cond_c
+-
+-    const/4 v0, 0x2
+-
+-    goto :goto_4
+-
+-    .line 0
+-    :cond_c
+-    invoke-static {v6}, Lo0/f;->a(Landroid/content/Context;)I
++    invoke-static {v6}, Lo0/f;->g(Landroid/content/Context;)I
+ 
+@@ -420,3 +398,2 @@
+ 
+-    :goto_4
+     if-eqz p1, :cond_d
+diff --git a/smali/o0/j.smali b/smali/o0/j.smali
+index c9201b1..a1e3b05 100644
+--- a/smali/o0/j.smali
++++ b/smali/o0/j.smali
+@@ -122,64 +122,2 @@
+     :pswitch_0
+-    sget-object v4, Lcn/gaoming/tv/MainActivity;->Z:[Ljava/lang/String;
+-
+-    invoke-virtual {v1}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+-
+-    const/4 v4, 0x2
+-
+-    .line 0
+-    const-string v5, "video_output"
+-
+-    if-ne p2, v4, :cond_5
+-
+-    .line 0
+-    invoke-static {}, Lo0/f;->b()Z
+-
+-    move-result p2
+-
+-    if-eqz p2, :cond_4
+-
+-    invoke-static {v1}, Lo0/f;->e(Landroid/content/Context;)Landroid/content/SharedPreferences;
+-
+-    move-result-object p2
+-
+-    invoke-interface {p2}, Landroid/content/SharedPreferences;->edit()Landroid/content/SharedPreferences$Editor;
+-
+-    move-result-object p2
+-
+-    invoke-interface {p2, v5}, Landroid/content/SharedPreferences$Editor;->remove(Ljava/lang/String;)Landroid/content/SharedPreferences$Editor;
+-
+-    move-result-object p2
+-
+-    invoke-interface {p2}, Landroid/content/SharedPreferences$Editor;->apply()V
+-
+-    .line 0
+-    :cond_4
+-    iget-object p2, v1, Lcn/gaoming/tv/MainActivity;->j:Lo0/N;
+-
+-    invoke-virtual {p2, v3}, Lo0/N;->v(I)V
+-
+-    goto :goto_4
+-
+-    :cond_5
+-    invoke-static {v1}, Lo0/f;->a(Landroid/content/Context;)I
+-
+-    move-result v4
+-
+-    if-ne p2, v4, :cond_6
+-
+-    if-eqz v0, :cond_8
+-
+-    .line 0
+-    invoke-static {v1}, Lo0/f;->e(Landroid/content/Context;)Landroid/content/SharedPreferences;
+-
+-    move-result-object v0
+-
+-    invoke-interface {v0, v5}, Landroid/content/SharedPreferences;->contains(Ljava/lang/String;)Z
+-
+-    move-result v0
+-
+-    if-nez v0, :cond_8
+-
+-    .line 0
+-    :cond_6
+     invoke-static {v1}, Lo0/f;->e(Landroid/content/Context;)Landroid/content/SharedPreferences;
+@@ -192,11 +130,5 @@
+ 
+-    if-ne p2, v2, :cond_7
+-
+-    goto :goto_3
++    const-string v2, "video_output"
+ 
+-    :cond_7
+-    const/4 v2, 0x0
+-
+-    :goto_3
+-    invoke-interface {v0, v5, v2}, Landroid/content/SharedPreferences$Editor;->putInt(Ljava/lang/String;I)Landroid/content/SharedPreferences$Editor;
++    invoke-interface {v0, v2, p2}, Landroid/content/SharedPreferences$Editor;->putInt(Ljava/lang/String;I)Landroid/content/SharedPreferences$Editor;
+ 
+@@ -206,3 +138,6 @@
+ 
+-    .line 0
++    invoke-static {v1}, Lo0/f;->a(Landroid/content/Context;)I
++
++    move-result p2
++
+     iget-object v0, v1, Lcn/gaoming/tv/MainActivity;->j:Lo0/N;
+@@ -211,4 +146,2 @@
+ 
+-    :cond_8
+-    :goto_4
+     invoke-interface {p1}, Landroid/content/DialogInterface;->dismiss()V

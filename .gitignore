@@ -1,0 +1,16 @@
+/build/
+/dist/
+/work/
+__pycache__/
+*.apk
+*.dex
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.key
+*.pass
+*.password
+.env
+.env.*
