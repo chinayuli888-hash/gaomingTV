@@ -77,7 +77,6 @@ final class PlaybackController: ObservableObject {
 
     private func startCycle(at index: Int) {
         detachItem()
-        if player.status == .failed { player = AVPlayer() }
         remainingRoutes = selectedChannel?.routes.count ?? 0
         playRoute(at: index)
     }
@@ -89,6 +88,7 @@ final class PlaybackController: ObservableObject {
             return
         }
 
+        if player.status == .failed { player = AVPlayer() }
         remainingRoutes -= 1
         phase = .connecting
         let item = AVPlayerItem(url: routes[index].url)
@@ -129,8 +129,12 @@ final class PlaybackController: ObservableObject {
     private func advance(after item: AVPlayerItem) {
         // KVO, notifications and a timeout can all report the same failure, even after a channel switch.
         guard player.currentItem === item, phase == .connecting || phase == .playing else { return }
+        advanceRoute()
+    }
+
+    private func advanceRoute() {
         detachItem()
-        if player.status != .failed, remainingRoutes > 0, let channel = selectedChannel {
+        if remainingRoutes > 0, let channel = selectedChannel {
             playRoute(at: (routeIndex + 1) % channel.routes.count)
         } else {
             phase = .failed
@@ -152,8 +156,7 @@ final class PlaybackController: ObservableObject {
                 guard !Task.isCancelled, let self else { return }
                 if self.player.status == .failed {
                     // A terminal player may already have released its current item.
-                    self.detachItem()
-                    self.phase = .failed
+                    self.advanceRoute()
                     return
                 }
                 guard let item, self.player.currentItem === item else { return }
