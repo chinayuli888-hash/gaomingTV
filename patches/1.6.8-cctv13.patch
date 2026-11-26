@@ -1,0 +1,15 @@
+diff --git a/smali/o0/N.smali b/smali/o0/N.smali
+index bd574e5..72c4a8c 100644
+--- a/smali/o0/N.smali
++++ b/smali/o0/N.smali
+@@ -1968,6 +1968,10 @@
+ 
+     invoke-virtual {v1, p1, v3, v2}, Lcn/gaoming/tv/MainActivity;->l(Ljava/lang/String;ZZ)V
+ 
++    iget-object v4, p0, Lo0/N;->u:Lo0/a;
++
++    invoke-static {v1, v4}, Lcn/gaoming/tv/Cctv13Fallback;->show(Landroid/app/Activity;Lo0/a;)V
++
+     :cond_4
+     :goto_0
+     return-void

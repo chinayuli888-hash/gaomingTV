@@ -1,0 +1,185 @@
+diff --git a/smali/cn/gaoming/tv/MainActivity.smali b/smali/cn/gaoming/tv/MainActivity.smali
+index 3905796..d4863bc 100644
+--- a/smali/cn/gaoming/tv/MainActivity.smali
++++ b/smali/cn/gaoming/tv/MainActivity.smali
+@@ -862,6 +862,37 @@
+ .method public final C(Lo0/a;Z)V
+     .locals 8
+ 
++    iget v0, p0, Lcn/gaoming/tv/MainActivity;->v:I
++
++    const/4 v1, 0x2
++
++    if-lt v0, v1, :select_route
++
++    iget-object v1, p0, Lcn/gaoming/tv/MainActivity;->e:Ljava/util/ArrayList;
++
++    invoke-virtual {v1}, Ljava/util/ArrayList;->size()I
++
++    move-result v2
++
++    if-ge v0, v2, :select_route
++
++    invoke-virtual {v1, v0}, Ljava/util/ArrayList;->get(I)Ljava/lang/Object;
++
++    move-result-object v0
++
++    sget-object v1, Lcn/gaoming/tv/MainActivity;->PUBLIC_ROUTE_GROUP:Ljava/lang/String;
++
++    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++
++    move-result v0
++
++    if-eqz v0, :select_route
++
++    invoke-static {p1}, Lcn/gaoming/tv/NetworkChannels;->forPublicPlayback(Lo0/a;)Lo0/a;
++
++    move-result-object p1
++
++    :select_route
+     iget-object v0, p0, Lcn/gaoming/tv/MainActivity;->l:Lo0/a;
+ 
+     const/4 v1, 0x0
+@@ -4440,6 +4471,16 @@
+     return-void
+ .end method
+ 
++.method protected onActivityResult(IILandroid/content/Intent;)V
++    .locals 0
++
++    invoke-super {p0, p1, p2, p3}, Landroid/app/Activity;->onActivityResult(IILandroid/content/Intent;)V
++
++    invoke-static {p0, p1}, Lcn/gaoming/tv/GitHubUpdate;->onActivityResult(Lcn/gaoming/tv/MainActivity;I)V
++
++    return-void
++.end method
++
+ .method public final onDestroy()V
+     .locals 9
+ 
+@@ -5487,6 +5528,22 @@
+ 
+     move-result-object v0
+ 
++    array-length v2, v0
++
++    add-int/lit8 v3, v2, 0x1
++
++    invoke-static {v0, v3}, Ljava/util/Arrays;->copyOf([Ljava/lang/Object;I)[Ljava/lang/Object;
++
++    move-result-object v0
++
++    check-cast v0, [Ljava/lang/String;
++
++    invoke-static {p0}, Lcn/gaoming/tv/GitHubUpdate;->settingsLabel(Landroid/content/Context;)Ljava/lang/String;
++
++    move-result-object v3
++
++    aput-object v3, v0, v2
++
+     new-instance v1, Landroid/app/AlertDialog$Builder;
+ 
+     invoke-direct {v1, p0}, Landroid/app/AlertDialog$Builder;-><init>(Landroid/content/Context;)V
+diff --git a/smali/o0/G.smali b/smali/o0/G.smali
+index 4c5818e..d0fc059 100644
+--- a/smali/o0/G.smali
++++ b/smali/o0/G.smali
+@@ -49,6 +49,8 @@
+ 
+     iget v3, p1, Le/M;->g:I
+ 
++    iput v3, v1, Lo0/J;->playbackErrorCode:I
++
+     invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
+ 
+     invoke-virtual {v2}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+diff --git a/smali/o0/J.smali b/smali/o0/J.smali
+index 9301777..2dc7bfe 100644
+--- a/smali/o0/J.smali
++++ b/smali/o0/J.smali
+@@ -30,6 +30,8 @@
+ 
+ .field public m:J
+ 
++.field public playbackErrorCode:I
++
+ 
+ # direct methods
+ .method public constructor <init>(IIIZ)V
+diff --git a/smali/o0/N.smali b/smali/o0/N.smali
+index 39ee2fb..bd574e5 100644
+--- a/smali/o0/N.smali
++++ b/smali/o0/N.smali
+@@ -1937,6 +1937,8 @@
+     goto :goto_0
+ 
+     :cond_3
++    iget v0, p1, Lo0/J;->playbackErrorCode:I
++
+     iget-object p1, p0, Lo0/N;->c:Lo0/P;
+ 
+     invoke-virtual {p1}, Lo0/P;->a()V
+@@ -1945,6 +1947,23 @@
+ 
+     const-string p1, "\u6682\u65f6\u65e0\u6cd5\u64ad\u653e \u00b7 \u53ef\u91cd\u8bd5\u6216\u6362\u53f0"
+ 
++    if-eqz v0, :report_failure
++
++    new-instance v4, Ljava/lang/StringBuilder;
++
++    invoke-direct {v4, p1}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
++
++    const-string p1, " \u00b7 \u9519\u8bef "
++
++    invoke-virtual {v4, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++
++    invoke-virtual {v4, v0}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
++
++    invoke-virtual {v4}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
++
++    move-result-object p1
++
++    :report_failure
+     check-cast v1, Lcn/gaoming/tv/MainActivity;
+ 
+     invoke-virtual {v1, p1, v3, v2}, Lcn/gaoming/tv/MainActivity;->l(Ljava/lang/String;ZZ)V
+@@ -2524,19 +2543,8 @@
+ 
+     invoke-virtual {p0, v2}, Landroid/view/View;->setKeepScreenOn(Z)V
+ 
+-    iget p2, v0, Lo0/J;->c:I
+-
+-    if-le p2, v2, :cond_1
+-
+-    const-wide/16 p2, 0x186a
+-
+-    goto :goto_0
+-
+-    :cond_1
+     const-wide/16 p2, 0x36b0
+ 
+-    .line 0
+-    :goto_0
+     iget-object p4, p0, Lo0/N;->e:Landroid/os/Handler;
+ 
+     iget-object v1, p0, Lo0/N;->f:Lo0/B;
+diff --git a/smali/o0/g.smali b/smali/o0/g.smali
+index 58c84d9..bc23631 100644
+--- a/smali/o0/g.smali
++++ b/smali/o0/g.smali
+@@ -181,6 +181,15 @@
+ 
+     add-int/lit8 v8, v8, 0x7
+ 
++    add-int/lit8 v9, v8, 0x1
++
++    if-ne p2, v9, :channel_policy_settings
++
++    invoke-static {v6}, Lcn/gaoming/tv/GitHubUpdate;->show(Lcn/gaoming/tv/MainActivity;)V
++
++    return-void
++
++    :channel_policy_settings
+     if-ne p2, v8, :original_settings
+ 
+     invoke-static {v6}, Lcn/gaoming/tv/ChannelPolicy;->showSettings(Lcn/gaoming/tv/MainActivity;)V

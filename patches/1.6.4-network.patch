@@ -1,0 +1,123 @@
+diff --git a/smali/cn/gaoming/tv/MainActivity.smali b/smali/cn/gaoming/tv/MainActivity.smali
+--- a/smali/cn/gaoming/tv/MainActivity.smali
++++ b/smali/cn/gaoming/tv/MainActivity.smali
+@@ -11,6 +11,8 @@
+ 
+ .field public static final a0:[I
+ 
++.field private static final PUBLIC_ROUTE_GROUP:Ljava/lang/String; = "\u0000\u516c\u7f51\u7ebf\u8def"
++
+ .field public static final b0:[Ljava/lang/String;
+ 
+ 
+@@ -376,9 +378,19 @@
+ 
+     invoke-virtual {v5, v10, v11}, Ljava/util/HashMap;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+ 
++    invoke-static {v9}, Lcn/gaoming/tv/NetworkChannels;->hasPublicRoute(Lo0/a;)Z
++
++    move-result v10
++
+     invoke-static {p0, v9}, Lcn/gaoming/tv/ChannelPolicy;->label(Landroid/content/Context;Lo0/a;)Ljava/lang/String;
+ 
+     move-result-object v9
++
++    invoke-interface {v6, v9}, Ljava/util/Set;->add(Ljava/lang/Object;)Z
++
++    if-eqz v10, :goto_1
++
++    sget-object v9, Lcn/gaoming/tv/MainActivity;->PUBLIC_ROUTE_GROUP:Ljava/lang/String;
+ 
+     invoke-interface {v6, v9}, Ljava/util/Set;->add(Ljava/lang/Object;)Z
+ 
+@@ -571,6 +583,24 @@
+     return-void
+ .end method
+ 
++.method public static displayCategory(Ljava/lang/CharSequence;)Ljava/lang/CharSequence;
++    .locals 1
++
++    sget-object v0, Lcn/gaoming/tv/MainActivity;->PUBLIC_ROUTE_GROUP:Ljava/lang/String;
++
++    invoke-virtual {v0, p0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++
++    move-result v0
++
++    if-eqz v0, :original
++
++    const-string p0, "\u516c\u7f51\u7ebf\u8def"
++
++    :original
++    return-object p0
++.end method
++
++
+ .method public static t(Landroid/app/AlertDialog$Builder;)V
+     .locals 0
+ 
+@@ -3661,6 +3691,23 @@
+ 
+     check-cast v3, Ljava/lang/String;
+ 
++    sget-object v4, Lcn/gaoming/tv/MainActivity;->PUBLIC_ROUTE_GROUP:Ljava/lang/String;
++
++    invoke-virtual {v4, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++
++    move-result v4
++
++    if-eqz v4, :original_group
++
++    invoke-static {v2}, Lcn/gaoming/tv/NetworkChannels;->hasPublicRoute(Lo0/a;)Z
++
++    move-result v3
++
++    if-eqz v3, :cond_0
++
++    goto :goto_1
++
++    :original_group
+     invoke-static {p0, v2}, Lcn/gaoming/tv/ChannelPolicy;->label(Landroid/content/Context;Lo0/a;)Ljava/lang/String;
+ 
+     move-result-object v4
+@@ -3700,6 +3747,10 @@
+     check-cast v2, Ljava/lang/CharSequence;
+ 
+     :goto_2
++    invoke-static {v2}, Lcn/gaoming/tv/MainActivity;->displayCategory(Ljava/lang/CharSequence;)Ljava/lang/CharSequence;
++
++    move-result-object v2
++
+     invoke-virtual {v1, v2}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
+ 
+     iget-object v1, p0, Lcn/gaoming/tv/MainActivity;->C:Landroid/widget/TextView;
+diff --git a/smali/o0/d.smali b/smali/o0/d.smali
+--- a/smali/o0/d.smali
++++ b/smali/o0/d.smali
+@@ -2362,5 +2362,13 @@
+     :goto_0
+     iget-object v0, p0, Lo0/d;->d:Ljava/util/List;
+ 
++    iget-object v1, p0, Lo0/d;->a:Landroid/content/Context;
++
++    invoke-static {v1, v0}, Lcn/gaoming/tv/NetworkChannels;->addToBuiltIn(Landroid/content/Context;Ljava/util/List;)Ljava/util/List;
++
++    move-result-object v0
++
++    iput-object v0, p0, Lo0/d;->d:Ljava/util/List;
++
+     return-object v0
+ .end method
+diff --git a/smali/o0/z.smali b/smali/o0/z.smali
+--- a/smali/o0/z.smali
++++ b/smali/o0/z.smali
+@@ -232,6 +232,10 @@
+ 
+     check-cast p1, Ljava/lang/CharSequence;
+ 
++    invoke-static {p1}, Lcn/gaoming/tv/MainActivity;->displayCategory(Ljava/lang/CharSequence;)Ljava/lang/CharSequence;
++
++    move-result-object p1
++
+     :goto_2
+     invoke-virtual {v5, p1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
+ 

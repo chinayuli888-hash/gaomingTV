@@ -9,6 +9,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import tempfile
+from xml.etree import ElementTree
 from zipfile import BadZipFile, ZipFile
 
 
@@ -27,6 +28,8 @@ class Release:
     code: int
     patch: str
     channel_policy: bool = False
+    public_catalog: bool = False
+    updater: bool = False
 
 
 RELEASES = {
@@ -36,7 +39,8 @@ RELEASES = {
     ),
     "8ff5e011e06cba4430fe4c6731262896a8fb1727b6ebac59d5932d9fced4c47f": Release(
         "1.6.1", 8, "990665d8920f969dad0a6fc40be742ed347f217fe5b23cd49aec3402864fa27e",
-        "1.6.3", 10, "1.6.3-from-1.6.1.patch", channel_policy=True,
+        "1.6.8", 15, "1.6.3-from-1.6.1.patch", channel_policy=True, public_catalog=True,
+        updater=True,
     ),
 }
 
@@ -49,7 +53,7 @@ def parse_args(parser):
     parser.add_argument("--android-build-tools", type=Path, required=True,
                         help="Android SDK build-tools 36.0.0 directory on Linux or macOS")
     parser.add_argument("--android-platform-jar", type=Path,
-                        help="Android 35 android.jar for 1.6.3 (defaults to the same SDK)")
+                        help="Android 35 android.jar for 1.6.8 (defaults to the same SDK)")
     parser.add_argument("--output", type=Path, required=True,
                         help="New APK output path (aligned unsigned APK by default)")
     parser.add_argument("--keystore", type=Path,
@@ -83,10 +87,10 @@ def signature_entry(name):
     )
 
 
-def package_apk(base_apk, classes_dex, destination, release):
+def package_apk(base_apk, classes_dex, destination, release, update_manifest=None):
     base_name = release.base_name.encode("utf-16-le")
     release_name = release.name.encode("utf-16-le")
-    if len(release_name) != len(base_name):
+    if update_manifest is None and len(release_name) != len(base_name):
         raise ValueError("Release name must occupy the same UTF-16LE bytes as the base name")
 
     with ZipFile(base_apk) as base, ZipFile(destination, "w", compresslevel=6) as output:
@@ -96,8 +100,11 @@ def package_apk(base_apk, classes_dex, destination, release):
                 or int.from_bytes(manifest[MANIFEST_CODE], "little") != release.base_code):
             raise ValueError(f"Unexpected {release.base_name} manifest version fields")
 
-        manifest[MANIFEST_NAME] = release_name
-        manifest[MANIFEST_CODE] = release.code.to_bytes(4, "little")
+        if update_manifest is None:
+            manifest[MANIFEST_NAME] = release_name
+            manifest[MANIFEST_CODE] = release.code.to_bytes(4, "little")
+        else:
+            manifest = update_manifest
         replacements = {"AndroidManifest.xml": manifest, "classes.dex": classes_dex.read_bytes()}
 
         output.comment = base.comment
@@ -108,6 +115,8 @@ def package_apk(base_apk, classes_dex, destination, release):
             if data is None:
                 data = base.read(entry)
             output.writestr(entry, data)
+        if release.public_catalog:
+            output.writestr("assets/public-network.m3u", (ROOT / "playlists/public-network.m3u").read_bytes())
 
 
 def publish_apk(source, destination):
@@ -119,13 +128,64 @@ def publish_apk(source, destination):
         os.link(staged_apk, destination)
 
 
-def assemble_channel_policy(args, work, base_apk, decoded, framework, apktool):
+def android_platform(args):
     platform = args.android_platform_jar
     if platform is None:
         platform = args.android_build_tools.parent.parent / "platforms/android-35/android.jar"
     if not platform.is_file():
         raise FileNotFoundError(f"Set --android-platform-jar to Android 35 android.jar ({platform})")
+    return platform
 
+
+def build_update_manifest(args, work, base_apk, framework, apktool, release):
+    manifest_files = work / "manifest-files"
+    subprocess.run([*apktool, "d", "-s", "--no-assets", "-p", framework, "-o",
+                    manifest_files, base_apk], check=True)
+
+    manifest_path = manifest_files / "AndroidManifest.xml"
+    manifest = ElementTree.parse(manifest_path)
+    root = manifest.getroot()
+    application = root.find("application")
+    if root.get("package") != "cn.gaoming.tv" or application is None:
+        raise ValueError("The original application manifest has an unexpected package")
+
+    namespace = "http://schemas.android.com/apk/res/android"
+    ElementTree.register_namespace("android", namespace)
+    android = "{" + namespace + "}"
+    root.set(android + "versionName", release.name)
+    root.set(android + "versionCode", str(release.code))
+    main_activity = next((element for element in application.findall("activity")
+                          if element.get(android + "name") == ".MainActivity"), None)
+    if main_activity is None:
+        raise ValueError("The original application manifest has no MainActivity")
+    main_activity.set(android + "screenOrientation", "unspecified")
+    config_changes = main_activity.get(android + "configChanges", "").split("|")
+    main_activity.set(android + "configChanges", "|".join(
+        change for change in config_changes if change not in ("orientation", "screenSize")
+    ))
+    queries = ElementTree.Element("queries")
+    ElementTree.SubElement(queries, "package", {android + "name": "com.tv.qx"})
+    root.insert(list(root).index(application), queries)
+    for permission in ("REQUEST_INSTALL_PACKAGES", "UPDATE_PACKAGES_WITHOUT_USER_ACTION"):
+        element = ElementTree.Element("uses-permission", {android + "name": "android.permission." + permission})
+        root.insert(list(root).index(application), element)
+    ElementTree.SubElement(application, "receiver", {
+        android + "name": "cn.gaoming.tv.UpdateInstallReceiver",
+        android + "exported": "false",
+    })
+    manifest.write(manifest_path, encoding="utf-8", xml_declaration=True)
+
+    # Resolve manifest resource references against the pinned APK, then keep its original resource table.
+    linked = work / "linked-manifest.apk"
+    subprocess.run([args.android_build_tools / "aapt2", "link", "-I", android_platform(args),
+                    "-I", base_apk, "--min-sdk-version", "19", "--target-sdk-version", "34",
+                    "--manifest", manifest_path, "-o", linked], check=True)
+    with ZipFile(linked) as output:
+        return output.read("AndroidManifest.xml")
+
+
+def assemble_channel_policy(args, work, base_apk, decoded, framework, apktool, release):
+    platform = android_platform(args)
     sources = sorted((ROOT / "channel-policy").rglob("*.java"))
     classes = work / "channel-policy-classes"
     classes.mkdir()
@@ -134,7 +194,14 @@ def assemble_channel_policy(args, work, base_apk, decoded, framework, apktool):
                     "-classpath", platform, "-d", classes, *sources], check=True)
 
     package = Path("cn/gaoming/tv")
-    helpers = sorted((classes / package).glob("ChannelPolicy*.class"))
+    helper_names = ("ChannelPolicy", "NetworkChannels")
+    if release.updater:
+        helper_names += ("GitHubUpdate", "UpdateInstallReceiver", "DeviceLayout", "LegacyTls", "Cctv13Fallback")
+    missing = [name for name in helper_names if not (classes / package / f"{name}.class").is_file()]
+    if missing:
+        raise ValueError(f"Missing compiled APK helpers: {', '.join(missing)}")
+    helpers = sorted(path for path in (classes / package).glob("*.class")
+                     if path.stem.startswith(helper_names))
     helper_dex = work / "channel-policy-dex"
     helper_dex.mkdir()
     subprocess.run([args.android_build_tools / "d8", "--min-api", "19", "--lib", platform,
@@ -151,7 +218,7 @@ def assemble_channel_policy(args, work, base_apk, decoded, framework, apktool):
                     helper_apk], check=True)
     smali_files = list((helper_smali / "smali").rglob("*.smali"))
     if not smali_files or any(
-        path.parent != helper_smali / "smali" / package or not path.stem.startswith("ChannelPolicy")
+        path.parent != helper_smali / "smali" / package or not path.stem.startswith(helper_names)
         for path in smali_files
     ):
         raise ValueError("Unexpected classes in the channel policy DEX")
@@ -173,12 +240,21 @@ def rebuild(args, work, base_apk, release):
     patch = ROOT / "patches" / release.patch
     subprocess.run(["git", "apply", "--whitespace=nowarn", "-p1", patch],
                    cwd=decoded, env=git_env, check=True)
+    if release.public_catalog:
+        subprocess.run(["git", "apply", "--whitespace=nowarn", "-p1", ROOT / "patches" / "1.6.4-network.patch"],
+                       cwd=decoded, env=git_env, check=True)
+    update_manifest = None
+    if release.updater:
+        for patch_name in ("1.6.5-update.patch", "1.6.7-devices.patch", "1.6.8-cctv13.patch"):
+            subprocess.run(["git", "apply", "--whitespace=nowarn", "-p1", ROOT / "patches" / patch_name],
+                           cwd=decoded, env=git_env, check=True)
+        update_manifest = build_update_manifest(args, work, base_apk, framework, apktool, release)
     if release.channel_policy:
-        assemble_channel_policy(args, work, base_apk, decoded, framework, apktool)
+        assemble_channel_policy(args, work, base_apk, decoded, framework, apktool, release)
 
     subprocess.run([*apktool, "b", "--no-apk", "-p", framework, decoded], check=True)
     unsigned = work / "unsigned.apk"
-    package_apk(base_apk, decoded / "build" / "apk" / "classes.dex", unsigned, release)
+    package_apk(base_apk, decoded / "build" / "apk" / "classes.dex", unsigned, release, update_manifest)
 
     zipalign = args.android_build_tools / "zipalign"
     apksigner = args.android_build_tools / "apksigner"
