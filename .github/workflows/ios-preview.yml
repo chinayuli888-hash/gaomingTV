@@ -2,18 +2,18 @@ name: Gaoming TV iOS preview
 
 on:
   push:
-    branches: [codex/ios-preview]
+    branches: [codex/ios-preview-xcode26]
 
 permissions:
   contents: read
 
 concurrency:
-  group: gaoming-tv-ios-preview
+  group: gaoming-tv-ios-preview-xcode26
   cancel-in-progress: true
 
 jobs:
   playback:
-    runs-on: macos-15-intel
+    runs-on: macos-26-intel
     timeout-minutes: 32
     env:
       TZ: Asia/Shanghai
