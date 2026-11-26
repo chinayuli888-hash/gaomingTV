@@ -16,3 +16,13 @@ bash ios/ci/test-simulators.sh "$PWD/build/ios-test-$(date +%Y%m%d-%H%M%S)"
 - UI 测试检查首条线路返回 404 后第二条线路进入实际播放、切换频道后继续播放、所有线路失败时出现重试入口，以及失败后能够换到可播频道。服务器日志单独核对两份媒体片段已送达。
 - 另一项测试从随包的 `playlists/public-network.m3u` 载入频道，检查频道列表在横竖屏均可见。公网频道实际播放效果需要在目标运营商网络验证。
 - 本测试流程不需要 Apple 账号。真机安装需要团队签名和设备授权，提交 TestFlight 或 App Store 则需要相应的 Apple Developer Program 团队和 App Store Connect 权限。
+
+## TestFlight 内测包
+
+首版为 `0.1.0`，最低 iOS／iPadOS 16，Bundle ID 为 `cn.gaoming.tv.ios`。在 App Store Connect 需要有对应 Bundle ID 的 iOS 应用记录，并由有权限的团队成员上传。Apple 要求上传使用 Xcode 26 和 iOS 26 SDK 或以上。[创建应用记录](https://developer.apple.com/help/app-store-connect/create-an-app-record/add-a-new-app/) · [Apple 上传要求](https://developer.apple.com/news/upcoming-requirements/)
+
+在具备签名条件的 Mac 上，可将团队 `.p8` 文件保存在仓库以外，再通过 `APPLE_TEAM_ID`、`ASC_KEY_ID`、`ASC_ISSUER_ID` 和 `ASC_KEY_PATH` 调用 `bash ios/ci/upload-testflight.sh`。脚本核对包名、版本和团队签名后上传构建。
+
+若通过 GitHub Actions 上传，请在仓库的 Settings → Environments 创建 `testflight`，将部署分支限定为 `codex/ios-testflight`。把团队 ID、密钥 ID、Issuer ID 和 `.p8` 内容分别放入 **环境 Secrets** `APPLE_TEAM_ID`、`ASC_KEY_ID`、`ASC_ISSUER_ID`、`ASC_KEY_P8`。后续构建通过环境变量 `GAOMING_BUILD_NUMBER` 指定未使用的构建号。这样仅审核后的 TestFlight 分支可使用这些签名配置。[GitHub 环境保护](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments)
+
+上传后可在 App Store Connect 的 TestFlight 页面查看 Apple 的处理状态。处理完成后，把构建分配给内测组，受邀测试者即可在 iPhone 或 iPad 的 TestFlight 中安装。[内测分发](https://developer.apple.com/help/app-store-connect/test-a-beta-version/add-internal-testers/)

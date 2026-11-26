@@ -17,6 +17,7 @@ jobs:
     timeout-minutes: 32
     env:
       TZ: Asia/Shanghai
+      IOS_PREVIEW_DOWNLOAD_RUNTIME: '1'
     steps:
       - name: Check out the requested source revision
         shell: bash
@@ -28,6 +29,23 @@ jobs:
           git checkout --detach FETCH_HEAD
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           printf 'SAVE_DATE=%s\n' "$(date +%F)" >> "$GITHUB_ENV"
+      - name: Select the latest stable installed Xcode
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' >> "$GITHUB_ENV"
+          import re
+          from pathlib import Path
+
+          versions = []
+          for path in Path('/Applications').glob('Xcode_*.app'):
+              found = re.fullmatch(r'Xcode_(\d+(?:\.\d+)*)\.app', path.name)
+              if found:
+                  parts = tuple(int(part) for part in found[1].split('.'))
+                  versions.append((parts, path))
+          if versions:
+              print(f'DEVELOPER_DIR={max(versions)[1] / "Contents/Developer"}')
+          PY
       - name: Build the app and test playback on iPhone and iPad
         shell: bash
         run: bash ios/ci/test-simulators.sh "$RUNNER_TEMP/gaoming-ios-test"

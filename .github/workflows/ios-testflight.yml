@@ -1,0 +1,48 @@
+name: Gaoming TV TestFlight upload
+
+on:
+  push:
+    branches: [codex/ios-testflight]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gaoming-tv-ios-testflight
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    runs-on: macos-26-intel
+    timeout-minutes: 35
+    environment: testflight
+    env:
+      TZ: Asia/Shanghai
+    steps:
+      - name: Check out the requested source revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init .
+          git remote add origin "https://github.com/$GITHUB_REPOSITORY.git"
+          git fetch --no-tags --depth=1 origin "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - name: Sign and upload the internal preview to App Store Connect
+        shell: bash
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          GAOMING_BUILD_NUMBER: ${{ vars.GAOMING_BUILD_NUMBER }}
+        run: |
+          set +x
+          set -euo pipefail
+          : "${ASC_KEY_P8:?Configure the App Store Connect private key in the protected testflight environment.}"
+          umask 077
+          key="$(mktemp "$RUNNER_TEMP/gaoming-testflight-key.XXXXXXXX")"
+          trap 'rm -f -- "$key"' EXIT
+          printf '%s\n' "$ASC_KEY_P8" > "$key"
+          unset ASC_KEY_P8
+          ASC_KEY_PATH="$key" bash ios/ci/upload-testflight.sh
