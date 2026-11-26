@@ -28,6 +28,11 @@ xcodebuild "${project[@]}" -configuration Release -destination 'generic/platform
     tail -n 120 "$output/release-build_$save_date.log"; exit 1;
   }
 app_plist="$scratch/device-build/Build/Products/Release-iphoneos/GaomingTV.app/Info.plist"
+privacy_manifest="$(dirname "$app_plist")/PrivacyInfo.xcprivacy"
+plutil -lint "$privacy_manifest"
+[[ $(/usr/libexec/PlistBuddy -c 'Print :ITSAppUsesNonExemptEncryption' "$app_plist") == false ]] || {
+  echo "Release is missing its encryption export declaration"; exit 1
+}
 if /usr/libexec/PlistBuddy -c 'Print :NSAppTransportSecurity:NSAllowsLocalNetworking' "$app_plist" >/dev/null 2>&1; then
   echo "Unexpected debug networking exception in Release"; exit 1
 fi

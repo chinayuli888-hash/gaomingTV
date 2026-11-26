@@ -52,6 +52,12 @@
 			path = "Simulator-Debug-Info.plist";
 			sourceTree = "<group>";
 		};
+		00000000000000000000002B /* PrivacyInfo.xcprivacy */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.xml;
+			path = "Resources/PrivacyInfo.xcprivacy";
+			sourceTree = "<group>";
+		};
 		000000000000000000000009 /* GaomingTV.app */ = {
 			isa = PBXFileReference;
 			explicitFileType = wrapper.application;
@@ -94,6 +100,10 @@
 			isa = PBXBuildFile;
 			fileRef = 000000000000000000000007 /* public-network.m3u */;
 		};
+		00000000000000000000002C /* Build PrivacyInfo.xcprivacy */ = {
+			isa = PBXBuildFile;
+			fileRef = 00000000000000000000002B /* PrivacyInfo.xcprivacy */;
+		};
 		000000000000000000000016 /* Root */ = {
 			isa = PBXGroup;
 			children = (
@@ -114,6 +124,7 @@
 				000000000000000000000003 /* ChannelCatalog.swift */,
 				000000000000000000000004 /* PlaybackController.swift */,
 				000000000000000000000006 /* Resources/Assets.xcassets */,
+				00000000000000000000002B /* PrivacyInfo.xcprivacy */,
 			);
 			sourceTree = "<group>";
 		};
@@ -159,6 +170,7 @@
 			files = (
 				000000000000000000000010 /* Build Resources/Assets.xcassets */,
 				000000000000000000000011 /* Build public-network.m3u */,
+				00000000000000000000002C /* Build PrivacyInfo.xcprivacy */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -311,6 +323,7 @@
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = cn.gaoming.tv.ios;
 				INFOPLIST_KEY_CFBundleDisplayName = "高明TV";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
