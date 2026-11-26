@@ -8,7 +8,7 @@ enum PlaybackPhase: Equatable {
 
 @MainActor
 final class PlaybackController: ObservableObject {
-    let player = AVPlayer()
+    @Published private(set) var player = AVPlayer()
 
     @Published private(set) var selectedChannel: Channel?
     @Published private(set) var routeIndex = 0
@@ -19,11 +19,21 @@ final class PlaybackController: ObservableObject {
     private var remainingRoutes = 0
     private var statusObservation: NSKeyValueObservation?
     private var notifications: [NSObjectProtocol] = []
+    private var routeChangeObserver: NSObjectProtocol?
     private var watchdog: Task<Void, Never>?
 
     init() {
         // AVPlayer activates the session when playback starts.
-        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback)
+        let session = AVAudioSession.sharedInstance()
+        try? session.setCategory(.playback, mode: .moviePlayback)
+        routeChangeObserver = NotificationCenter.default.addObserver(
+            forName: AVAudioSession.routeChangeNotification, object: session, queue: .main
+        ) { [weak self] note in
+            guard let reason = note.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt,
+                  reason == AVAudioSession.RouteChangeReason.oldDeviceUnavailable.rawValue else { return }
+            // Output loss is a privacy pause, including if the streaming route is changing.
+            Task { @MainActor in self?.pause() }
+        }
     }
 
     func select(_ channel: Channel) {
@@ -42,7 +52,7 @@ final class PlaybackController: ObservableObject {
     }
 
     func pause() {
-        guard player.currentItem != nil else { return }
+        guard phase == .playing || phase == .connecting else { return }
         phase = .paused
         watchdog?.cancel()
         watchdog = nil
@@ -50,7 +60,12 @@ final class PlaybackController: ObservableObject {
     }
 
     func resume() {
-        guard phase == .paused, let item = player.currentItem else { return }
+        guard phase == .paused else { return }
+        if player.status == .failed {
+            startCycle(at: routeIndex)
+            return
+        }
+        guard let item = player.currentItem else { return }
         phase = .connecting
         if item.status == .failed {
             advance(after: item)
@@ -61,12 +76,13 @@ final class PlaybackController: ObservableObject {
     }
 
     private func startCycle(at index: Int) {
+        detachItem()
+        if player.status == .failed { player = AVPlayer() }
         remainingRoutes = selectedChannel?.routes.count ?? 0
         playRoute(at: index)
     }
 
     private func playRoute(at index: Int) {
-        detachItem()
         routeIndex = index
         guard let routes = selectedChannel?.routes, routes.indices.contains(index) else {
             phase = .failed
@@ -112,11 +128,11 @@ final class PlaybackController: ObservableObject {
 
     private func advance(after item: AVPlayerItem) {
         // KVO, notifications and a timeout can all report the same failure, even after a channel switch.
-        guard player.currentItem === item, phase != .paused else { return }
-        if remainingRoutes > 0, let channel = selectedChannel {
+        guard player.currentItem === item, phase == .connecting || phase == .playing else { return }
+        detachItem()
+        if player.status != .failed, remainingRoutes > 0, let channel = selectedChannel {
             playRoute(at: (routeIndex + 1) % channel.routes.count)
         } else {
-            detachItem()
             phase = .failed
         }
     }
@@ -133,7 +149,14 @@ final class PlaybackController: ObservableObject {
                 } catch {
                     return
                 }
-                guard !Task.isCancelled, let self, let item, self.player.currentItem === item else { return }
+                guard !Task.isCancelled, let self else { return }
+                if self.player.status == .failed {
+                    // A terminal player may already have released its current item.
+                    self.detachItem()
+                    self.phase = .failed
+                    return
+                }
+                guard let item, self.player.currentItem === item else { return }
                 let now = ProcessInfo.processInfo.systemUptime
                 let time = item.currentTime().seconds
                 let transport = self.player.timeControlStatus
@@ -162,13 +185,16 @@ final class PlaybackController: ObservableObject {
         statusObservation = nil
         for token in notifications { NotificationCenter.default.removeObserver(token) }
         notifications.removeAll()
-        player.pause()
-        player.replaceCurrentItem(with: nil)
+        if player.status != .failed {
+            player.pause()
+            player.replaceCurrentItem(with: nil)
+        }
     }
 
     deinit {
         watchdog?.cancel()
         statusObservation?.invalidate()
+        if let routeChangeObserver { NotificationCenter.default.removeObserver(routeChangeObserver) }
         for token in notifications { NotificationCenter.default.removeObserver(token) }
     }
 }

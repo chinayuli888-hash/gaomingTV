@@ -10,7 +10,8 @@ private let surface = Color(red: 0.105, green: 0.125, blue: 0.137)
 struct ContentView: View {
     @StateObject private var playback = PlaybackController()
     @Environment(\.scenePhase) private var scenePhase
-    @State private var channels: [Channel] = []
+    @State private var guide = ChannelGuide([])
+    private var channels: [Channel] { guide.channels }
     @State private var pickerVisible = false
     @State private var errorText: String?
     @State private var fullScreen = false
@@ -22,17 +23,25 @@ struct ContentView: View {
                 Divider()
                 if proxy.size.width >= 680 {
                     HStack(alignment: .top, spacing: 0) {
-                        ScrollView { guide.padding(16) }
-                            .frame(width: min(320, proxy.size.width * 0.32))
+                        ScrollView {
+                            LazyVStack(alignment: .leading, spacing: 4) {
+                                guideRows(onSelect: playback.select)
+                            }.padding(16)
+                        }.frame(width: min(320, proxy.size.width * 0.32))
                         Divider()
                         ScrollView { playerPane.padding(20) }
                     }
                 } else {
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 22) {
-                            playerPane
-                            guide
-                        }.padding(16)
+                    ScrollViewReader { scroll in
+                        ScrollView {
+                            LazyVStack(alignment: .leading, spacing: 4) {
+                                playerPane.padding(.bottom, 18).id(GuideAnchor.player)
+                                guideRows { channel in
+                                    playback.select(channel)
+                                    scroll.scrollTo(GuideAnchor.player, anchor: .top)
+                                }
+                            }.padding(16)
+                        }
                     }
                 }
             }.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -43,7 +52,7 @@ struct ContentView: View {
         .task {
             guard channels.isEmpty else { return }
             do {
-                channels = try await ChannelCatalog.load()
+                guide = ChannelGuide(try await ChannelCatalog.load())
                 if let first = channels.first { playback.select(first) }
             } catch {
                 errorText = error.localizedDescription
@@ -57,7 +66,7 @@ struct ContentView: View {
                                             UTType(filenameExtension: "m3u8") ?? .data]) { result in
             do {
                 let update = try ChannelCatalog.importFile(result.get())
-                channels = update.channels
+                guide = ChannelGuide(update.channels)
                 if let imported = channels.first(where: { $0.id == update.firstImportedID }) {
                     playback.select(imported)
                 }
@@ -218,27 +227,25 @@ struct ContentView: View {
         .accessibilityIdentifier("playback.phase")
     }
 
-    private var guide: some View {
-        let groups = channels.reduce(into: [String]()) { values, channel in
-            if !values.contains(channel.group) { values.append(channel.group) }
-        }
-        return VStack(alignment: .leading, spacing: 16) {
-            Text("频道").font(.title3.weight(.semibold)).accessibilityAddTraits(.isHeader)
-            ForEach(groups, id: \.self) { group in
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(group).font(.caption.weight(.medium)).foregroundColor(.secondary)
-                    ForEach(channels.filter { $0.group == group }) { channel in
-                        channelRow(channel)
-                    }
+    @ViewBuilder
+    private func guideRows(onSelect: @escaping (Channel) -> Void) -> some View {
+        Text("频道").font(.title3.weight(.semibold)).accessibilityAddTraits(.isHeader)
+        ForEach(guide.groups) { group in
+            Section {
+                ForEach(group.channels) { channel in
+                    channelRow(channel, onSelect: onSelect)
                 }
+            } header: {
+                Text(group.id).font(.caption.weight(.medium)).foregroundColor(.secondary)
+                    .padding(.top, 12).accessibilityAddTraits(.isHeader)
             }
-        }.frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 
-    private func channelRow(_ channel: Channel) -> some View {
+    private func channelRow(_ channel: Channel, onSelect: @escaping (Channel) -> Void) -> some View {
         let selected = channel.id == playback.selectedChannel?.id
         return Button {
-            playback.select(channel)
+            onSelect(channel)
         } label: {
             HStack(spacing: 12) {
                 RoundedRectangle(cornerRadius: 2)
@@ -260,6 +267,35 @@ struct ContentView: View {
         .accessibilityLabel(channel.name)
         .accessibilityAddTraits(selected ? .isSelected : [])
         .accessibilityIdentifier("channel.\(channel.name)")
+    }
+}
+
+private enum GuideAnchor: Hashable {
+    case player
+}
+
+private struct ChannelGuide {
+    struct Group: Identifiable {
+        let id: String
+        var channels: [Channel]
+    }
+
+    let channels: [Channel]
+    let groups: [Group]
+
+    init(_ channels: [Channel]) {
+        self.channels = channels
+        var groups: [Group] = []
+        var indexes: [String: Int] = [:]
+        for channel in channels {
+            if let index = indexes[channel.group] {
+                groups[index].channels.append(channel)
+            } else {
+                indexes[channel.group] = groups.count
+                groups.append(Group(id: channel.group, channels: [channel]))
+            }
+        }
+        self.groups = groups
     }
 }
 
