@@ -83,13 +83,6 @@ public final class GitHubUpdate {
                         check(activity);
                     }
                 })
-                .setNeutralButton("发布页面", (dialog, which) -> {
-                    try {
-                        activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(RELEASES)));
-                    } catch (ActivityNotFoundException error) {
-                        Toast.makeText(activity, "此设备没有可打开 GitHub 的浏览器", Toast.LENGTH_LONG).show();
-                    }
-                })
                 .setNegativeButton("返回", null));
     }
 

@@ -184,19 +184,16 @@ def build_update_manifest(args, work, base_apk, framework, apktool, release):
         return output.read("AndroidManifest.xml")
 
 
-def assemble_channel_policy(args, work, base_apk, decoded, framework, apktool, release):
-    platform = android_platform(args)
+def compile_helper_smali(work, base_apk, platform, build_tools, framework, apktool, helper_names):
+    java = apktool[0]
     sources = sorted((ROOT / "channel-policy").rglob("*.java"))
     classes = work / "channel-policy-classes"
     classes.mkdir()
-    subprocess.run(["java", "-m", "jdk.compiler/com.sun.tools.javac.Main",
+    subprocess.run([java, "-m", "jdk.compiler/com.sun.tools.javac.Main",
                     "-source", "8", "-target", "8", "-Xlint:-options", "-encoding", "UTF-8",
                     "-classpath", platform, "-d", classes, *sources], check=True)
 
     package = Path("cn/gaoming/tv")
-    helper_names = ("ChannelPolicy", "NetworkChannels")
-    if release.updater:
-        helper_names += ("GitHubUpdate", "UpdateInstallReceiver", "DeviceLayout", "LegacyTls", "Cctv13Fallback")
     missing = [name for name in helper_names if not (classes / package / f"{name}.class").is_file()]
     if missing:
         raise ValueError(f"Missing compiled APK helpers: {', '.join(missing)}")
@@ -204,7 +201,8 @@ def assemble_channel_policy(args, work, base_apk, decoded, framework, apktool, r
                      if path.stem.startswith(helper_names))
     helper_dex = work / "channel-policy-dex"
     helper_dex.mkdir()
-    subprocess.run([args.android_build_tools / "d8", "--min-api", "19", "--lib", platform,
+    subprocess.run([java, "-cp", build_tools / "lib/d8.jar", "com.android.tools.r8.D8",
+                    "--min-api", "19", "--lib", platform,
                     "--classpath", classes, "--output", helper_dex, *helpers], check=True)
 
     # Give Apktool the base manifest so it can disassemble just the helper DEX.
@@ -222,8 +220,17 @@ def assemble_channel_policy(args, work, base_apk, decoded, framework, apktool, r
         for path in smali_files
     ):
         raise ValueError("Unexpected classes in the channel policy DEX")
-    for path in smali_files:
-        shutil.copyfile(path, decoded / "smali" / package / path.name)
+    return smali_files
+
+
+def assemble_channel_policy(args, work, base_apk, decoded, framework, apktool, release):
+    helper_names = ("ChannelPolicy", "NetworkChannels")
+    if release.updater:
+        helper_names += ("GitHubUpdate", "UpdateInstallReceiver", "DeviceLayout", "LegacyTls", "Cctv13Fallback")
+    files = compile_helper_smali(work, base_apk, android_platform(args), args.android_build_tools,
+                                 framework, apktool, helper_names)
+    for path in files:
+        shutil.copyfile(path, decoded / "smali/cn/gaoming/tv" / path.name)
 
 
 def rebuild(args, work, base_apk, release):
