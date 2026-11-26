@@ -14,7 +14,7 @@ concurrency:
 jobs:
   playback:
     runs-on: macos-15-intel
-    timeout-minutes: 32
+    timeout-minutes: 50
     env:
       TZ: Asia/Shanghai
       IOS_PREVIEW_DOWNLOAD_RUNTIME: '1'
