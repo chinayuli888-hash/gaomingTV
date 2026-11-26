@@ -1,0 +1,396 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 56;
+	objects = {
+		000000000000000000000001 /* GaomingTVApp.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "GaomingTVApp.swift";
+			sourceTree = "<group>";
+		};
+		000000000000000000000002 /* ContentView.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "ContentView.swift";
+			sourceTree = "<group>";
+		};
+		000000000000000000000003 /* ChannelCatalog.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "ChannelCatalog.swift";
+			sourceTree = "<group>";
+		};
+		000000000000000000000004 /* PlaybackController.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "PlaybackController.swift";
+			sourceTree = "<group>";
+		};
+		000000000000000000000005 /* PlaybackUITests.swift */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "PlaybackUITests.swift";
+			sourceTree = "<group>";
+		};
+		000000000000000000000006 /* Resources/Assets.xcassets */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = folder.assetcatalog;
+			path = "Resources/Assets.xcassets";
+			sourceTree = "<group>";
+		};
+		000000000000000000000007 /* public-network.m3u */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = "../playlists/public-network.m3u";
+			sourceTree = SOURCE_ROOT;
+		};
+		000000000000000000000008 /* Simulator-Debug-Info.plist */ = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			path = "Simulator-Debug-Info.plist";
+			sourceTree = "<group>";
+		};
+		000000000000000000000009 /* GaomingTV.app */ = {
+			isa = PBXFileReference;
+			explicitFileType = wrapper.application;
+			includeInIndex = 0;
+			path = "GaomingTV.app";
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		00000000000000000000000A /* GaomingTVUITests.xctest */ = {
+			isa = PBXFileReference;
+			explicitFileType = wrapper.cfbundle;
+			includeInIndex = 0;
+			path = "GaomingTVUITests.xctest";
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		00000000000000000000000B /* Build GaomingTVApp.swift */ = {
+			isa = PBXBuildFile;
+			fileRef = 000000000000000000000001 /* GaomingTVApp.swift */;
+		};
+		00000000000000000000000C /* Build ContentView.swift */ = {
+			isa = PBXBuildFile;
+			fileRef = 000000000000000000000002 /* ContentView.swift */;
+		};
+		00000000000000000000000D /* Build ChannelCatalog.swift */ = {
+			isa = PBXBuildFile;
+			fileRef = 000000000000000000000003 /* ChannelCatalog.swift */;
+		};
+		00000000000000000000000E /* Build PlaybackController.swift */ = {
+			isa = PBXBuildFile;
+			fileRef = 000000000000000000000004 /* PlaybackController.swift */;
+		};
+		00000000000000000000000F /* Build PlaybackUITests.swift */ = {
+			isa = PBXBuildFile;
+			fileRef = 000000000000000000000005 /* PlaybackUITests.swift */;
+		};
+		000000000000000000000010 /* Build Resources/Assets.xcassets */ = {
+			isa = PBXBuildFile;
+			fileRef = 000000000000000000000006 /* Resources/Assets.xcassets */;
+		};
+		000000000000000000000011 /* Build public-network.m3u */ = {
+			isa = PBXBuildFile;
+			fileRef = 000000000000000000000007 /* public-network.m3u */;
+		};
+		000000000000000000000016 /* Root */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000012 /* GaomingTV */,
+				000000000000000000000013 /* GaomingTVUITests */,
+				000000000000000000000014 /* ci */,
+				000000000000000000000007 /* public-network.m3u */,
+				000000000000000000000015 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		000000000000000000000012 /* GaomingTV */ = {
+			isa = PBXGroup;
+			path = "GaomingTV";
+			children = (
+				000000000000000000000001 /* GaomingTVApp.swift */,
+				000000000000000000000002 /* ContentView.swift */,
+				000000000000000000000003 /* ChannelCatalog.swift */,
+				000000000000000000000004 /* PlaybackController.swift */,
+				000000000000000000000006 /* Resources/Assets.xcassets */,
+			);
+			sourceTree = "<group>";
+		};
+		000000000000000000000013 /* GaomingTVUITests */ = {
+			isa = PBXGroup;
+			path = "GaomingTVUITests";
+			children = (
+				000000000000000000000005 /* PlaybackUITests.swift */,
+			);
+			sourceTree = "<group>";
+		};
+		000000000000000000000014 /* ci */ = {
+			isa = PBXGroup;
+			path = "ci";
+			children = (
+				000000000000000000000008 /* Simulator-Debug-Info.plist */,
+			);
+			sourceTree = "<group>";
+		};
+		000000000000000000000015 /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			children = (
+				000000000000000000000009 /* GaomingTV.app */,
+				00000000000000000000000A /* GaomingTVUITests.xctest */,
+			);
+			sourceTree = "<group>";
+		};
+		000000000000000000000017 /* App sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				00000000000000000000000B /* Build GaomingTVApp.swift */,
+				00000000000000000000000C /* Build ContentView.swift */,
+				00000000000000000000000D /* Build ChannelCatalog.swift */,
+				00000000000000000000000E /* Build PlaybackController.swift */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		000000000000000000000018 /* App resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				000000000000000000000010 /* Build Resources/Assets.xcassets */,
+				000000000000000000000011 /* Build public-network.m3u */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		000000000000000000000019 /* App frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		00000000000000000000001A /* UI test sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				00000000000000000000000F /* Build PlaybackUITests.swift */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		00000000000000000000001B /* UI test frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		00000000000000000000001C /* UI test resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		00000000000000000000001F /* App proxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 00000000000000000000001D /* Project */;
+			proxyType = 1;
+			remoteGlobalIDString = 00000000000000000000001E;
+			remoteInfo = GaomingTV;
+		};
+		000000000000000000000020 /* App dependency */ = {
+			isa = PBXTargetDependency;
+			target = 00000000000000000000001E /* App target */;
+			targetProxy = 00000000000000000000001F /* App proxy */;
+		};
+		00000000000000000000001E /* App target */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 000000000000000000000021 /* App target configs */;
+			buildPhases = (
+				000000000000000000000017 /* App sources */,
+				000000000000000000000019 /* App frameworks */,
+				000000000000000000000018 /* App resources */,
+			);
+			buildRules = ();
+			dependencies = (
+
+			);
+			name = GaomingTV;
+			productName = GaomingTV;
+			productReference = 000000000000000000000009 /* GaomingTV.app */;
+			productType = "com.apple.product-type.application";
+		};
+		000000000000000000000023 /* Test target */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 000000000000000000000022 /* Test target configs */;
+			buildPhases = (
+				00000000000000000000001A /* UI test sources */,
+				00000000000000000000001B /* UI test frameworks */,
+				00000000000000000000001C /* UI test resources */,
+			);
+			buildRules = ();
+			dependencies = (
+				000000000000000000000020 /* App dependency */,
+			);
+			name = GaomingTVUITests;
+			productName = GaomingTVUITests;
+			productReference = 00000000000000000000000A /* GaomingTVUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		000000000000000000000024 /* Project Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+			};
+			name = Debug;
+		};
+		000000000000000000000025 /* Project Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		000000000000000000000026 /* Project configs */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				000000000000000000000024 /* Project Debug */,
+				000000000000000000000025 /* Project Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		000000000000000000000027 /* App target Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CURRENT_PROJECT_VERSION = 1;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cn.gaoming.tv.ios;
+				INFOPLIST_KEY_CFBundleDisplayName = "高明TV";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone" = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_FILE = "ci/Simulator-Debug-Info.plist";
+			};
+			name = Debug;
+		};
+		000000000000000000000028 /* App target Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CURRENT_PROJECT_VERSION = 1;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cn.gaoming.tv.ios;
+				INFOPLIST_KEY_CFBundleDisplayName = "高明TV";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone" = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+			};
+			name = Release;
+		};
+		000000000000000000000021 /* App target configs */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				000000000000000000000027 /* App target Debug */,
+				000000000000000000000028 /* App target Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		000000000000000000000029 /* Test target Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = cn.gaoming.tv.ios.uitests;
+				TEST_TARGET_NAME = GaomingTV;
+				CURRENT_PROJECT_VERSION = 1;
+				MARKETING_VERSION = 1.0;
+			};
+			name = Debug;
+		};
+		00000000000000000000002A /* Test target Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = cn.gaoming.tv.ios.uitests;
+				TEST_TARGET_NAME = GaomingTV;
+				CURRENT_PROJECT_VERSION = 1;
+				MARKETING_VERSION = 1.0;
+			};
+			name = Release;
+		};
+		000000000000000000000022 /* Test target configs */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				000000000000000000000029 /* Test target Debug */,
+				00000000000000000000002A /* Test target Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		00000000000000000000001D /* Project */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 1640;
+				TargetAttributes = {
+					000000000000000000000023 = { TestTargetID = 00000000000000000000001E; };
+				};
+			};
+			buildConfigurationList = 000000000000000000000026 /* Project configs */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (en, Base, "zh-Hans");
+			mainGroup = 000000000000000000000016 /* Root */;
+			productRefGroup = 000000000000000000000015 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				00000000000000000000001E /* App target */,
+				000000000000000000000023 /* Test target */,
+			);
+		};
+	};
+	rootObject = 00000000000000000000001D /* Project */;
+}

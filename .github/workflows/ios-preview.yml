@@ -1,0 +1,52 @@
+name: Gaoming TV iOS preview
+
+on:
+  push:
+    branches: [codex/ios-preview]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gaoming-tv-ios-preview
+  cancel-in-progress: true
+
+jobs:
+  playback:
+    runs-on: macos-15
+    timeout-minutes: 32
+    env:
+      TZ: Asia/Shanghai
+    steps:
+      - name: Check out the requested source revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init .
+          git remote add origin "https://github.com/$GITHUB_REPOSITORY.git"
+          git fetch --no-tags --depth=1 origin "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          printf 'SAVE_DATE=%s\n' "$(date +%F)" >> "$GITHUB_ENV"
+      - name: Build the app and test playback on iPhone and iPad
+        shell: bash
+        run: bash ios/ci/test-simulators.sh "$RUNNER_TEMP/gaoming-ios-test"
+      - name: Archive the iOS Simulator application
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild -project ios/GaomingTV.xcodeproj -scheme GaomingTV -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' -derivedDataPath "$RUNNER_TEMP/gaoming-simulator-app" \
+            CODE_SIGNING_ALLOWED=NO build > "$RUNNER_TEMP/gaoming-ios-test/simulator-build_$SAVE_DATE.log" 2>&1 || {
+              tail -n 100 "$RUNNER_TEMP/gaoming-ios-test/simulator-build_$SAVE_DATE.log"; exit 1;
+            }
+          ditto -c -k --keepParent "$RUNNER_TEMP/gaoming-simulator-app/Build/Products/Debug-iphonesimulator/GaomingTV.app" \
+            "$RUNNER_TEMP/gaoming-ios-test/GaomingTV_iOS-Simulator_$SAVE_DATE.zip"
+      - name: Save build logs, simulator captures and test reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: gaoming-tv-ios-preview_${{ env.SAVE_DATE }}
+          path: ${{ runner.temp }}/gaoming-ios-test/
+          retention-days: 14
+          if-no-files-found: warn
